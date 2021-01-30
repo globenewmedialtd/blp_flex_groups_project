@@ -8,8 +8,8 @@ dependencies:
     - user
 _core:
   default_config_hash: 3KAQc6TXh1EMGrsI8qT0fiM9CFAgzJk7pudOE1Do4qY
-id: blp_group-group_membership
-label: 'Flexible group: Group membership'
+id: blp_project-group_membership
+label: 'BLP Project: Group membership'
 description: 'Adds users to groups as members.'
 group_type: blp_project
 content_plugin: group_membership
