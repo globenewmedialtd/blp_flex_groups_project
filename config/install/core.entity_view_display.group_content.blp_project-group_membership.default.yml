@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.group_content.blp_project-group_membership.group_roles
+    - group.content_type.blp_project-group_membership
+_core:
+  default_config_hash: _att_w7tm8SViQriauACBKmegluSQSyAd_J0i3enmfo
+id: group_content.blp_project-group_membership.default
+targetEntityType: group_content
+bundle: blp_project-group_membership
+mode: default
+content:
+  entity_id:
+    type: entity_reference_entity_id
+    weight: 0
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden:
+  group_roles: true
+  search_api_excerpt: true
+  uid: true

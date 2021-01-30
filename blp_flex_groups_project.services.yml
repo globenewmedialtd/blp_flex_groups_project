@@ -1,0 +1,26 @@
+services:
+  blp_flex_groups_project_access.group.permission:
+    class: 'Drupal\blp_flex_groups_project\Access\BlpFlexGroupsProjectContentAccessCheck'
+    tags:
+      - { name: 'access_check', applies_to: '_project_group_content_visibility', priority: -99 }
+  blp_flex_groups_project_access.project.permission:
+    class: 'Drupal\blp_flex_groups_project\Access\BlpFlexGroupsProjectJoinPermissionAccessCheck'
+    tags:
+      - { name: 'access_check', applies_to: '_project_group_join_permission', priority: -99 }
+
+  blp_flex_groups_project_access.route_subscriber:
+    class: Drupal\blp_flex_groups_project\Subscriber\Route
+    tags:
+      - { name: event_subscriber }
+
+  blp_flex_groups_project.config_override:
+    class: Drupal\blp_flex_groups_project\BlpFlexGroupsProjectConfigOverride
+    arguments: ['@config.factory']
+    tags:
+      - { name: config.factory.override, priority: 10 }
+
+  blp_flex_groups_project.redirect_subscriber:
+    class: Drupal\blp_flex_groups_project\EventSubscriber\RedirectSubscriber
+    arguments: ['@current_user', '@current_route_match']
+    tags:
+      - { name: event_subscriber }

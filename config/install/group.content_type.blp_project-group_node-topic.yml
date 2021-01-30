@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.blp_project
+    - node.type.topic
+  module:
+    - gnode
+    - node
+    - blp_flex_groups_project
+_core:
+  default_config_hash: NdqEQFRAz_vLVQbQZ-bats8yKYlmokAmmoJuhywMeNg
+id: blp_project-group_node-topic
+label: topic
+description: 'Adds <em class="placeholder">Topic</em> content to groups using private content settings.'
+group_type: blp_project
+content_plugin: 'group_node:topic'
+plugin_config:
+  group_cardinality: 1
+  entity_cardinality: 1
+  use_creation_wizard: false

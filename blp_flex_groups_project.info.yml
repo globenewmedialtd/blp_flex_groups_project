@@ -1,0 +1,8 @@
+name: 'BLP Flex Groups Project'
+description: 'Provides a flexible Group called Project.'
+type: module
+core: 8.x
+dependencies:
+  - social_group_flexible_group
+core_incompatible: false
+package: BLP
