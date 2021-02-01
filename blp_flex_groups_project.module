@@ -59,7 +59,7 @@ function blp_flex_groups_project_views_data_alter(array &$data) {
     'filter' => [
       'title' => t('Filter nodes, with visibility group, placed in group you are not a member of.'),
       'help' => t('Filter nodes, with visibility group, placed in group you are not a member of.'),
-      'id' => 'blp_project_node_access',
+      'id' => 'flexible_group_node_access',
     ],
   ];
 }
