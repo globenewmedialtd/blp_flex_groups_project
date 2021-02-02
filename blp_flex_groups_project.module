@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\group\Entity\Group;
 use Drupal\group\Entity\GroupInterface;
-use Drupal\blp_flex_groups_project\FlexibleGroupContentVisibilityUpdate;
+use Drupal\blp_flex_groups_project\BlpProjectContentVisibilityUpdate;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\Plugin\views\row\EntityRow;
 use Drupal\views\ViewExecutable;
@@ -138,7 +138,7 @@ function _blp_flex_groups_project_edit_submit(array $form, FormStateInterface $f
     $group = _social_group_get_current_group();
 
     // Update the default visibility of all the content.
-    FlexibleGroupContentVisibilityUpdate::batchUpdateGroupContentVisibility($group, $changed_visibility, $new_visibility);
+    BlpProjectContentVisibilityUpdate::batchUpdateGroupContentVisibility($group, $changed_visibility, $new_visibility);
 
     // Make sure we clear cache tags accordingly.
     $cache_tags = _social_group_cache_tags($group);
