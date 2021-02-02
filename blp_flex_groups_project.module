@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\group\Entity\Group;
 use Drupal\group\Entity\GroupInterface;
-use Drupal\social_group_flexible_group\FlexibleGroupContentVisibilityUpdate;
+use Drupal\blp_flex_groups_project\FlexibleGroupContentVisibilityUpdate;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\Plugin\views\row\EntityRow;
 use Drupal\views\ViewExecutable;
@@ -161,6 +161,4 @@ function blp_flex_groups_project_form_social_group_add_alter(&$form, FormStateIn
     $form['group_settings']['group_type']['#options']['blp_project'] = $flexible;
   }
 }
-
-
 
