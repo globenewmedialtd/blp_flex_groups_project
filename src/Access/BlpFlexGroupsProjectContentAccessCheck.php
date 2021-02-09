@@ -68,7 +68,7 @@ class BlpFlexGroupsProjectContentAccessCheck implements AccessInterface {
     // If User is a member we can also rely on Group to take permissions.
     if ($group->getMember($account) !== FALSE) {
       return AccessResult::allowed()->addCacheableDependency($group);
-    }
+    }   
 
     // It's a non member but Community isn't enabled.
     // No access for you only for the about page.
@@ -83,7 +83,8 @@ class BlpFlexGroupsProjectContentAccessCheck implements AccessInterface {
     // We allow it but lets add the group as dependency to the cache
     // now because field value might be edited and cache should
     // clear accordingly.
-    return AccessResult::allowed()->addCacheableDependency($group);
+    return AccessResult::allowed()->addCacheableDependency($group);    
+
   }
 
 }

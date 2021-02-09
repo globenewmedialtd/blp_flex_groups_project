@@ -46,14 +46,14 @@ function blp_flex_groups_project_social_group_flexible_group_content_routes_alte
     'view.group_members.page_group_members',
     'social_group.stream',
     'view.group_events.page_group_events',
-    'view.group_topics.page_group_topics',
+    'view.group_topics.page_group_topics'
   ];
 }
 
 /**
  * Implements hook_form_FORM_ID_form_alter().
  */
-function blp_flex_groups_project_form_group_project_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function blp_flex_groups_project_form_group_blp_project_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Lets remove group type from flexible group.
   // Editing is useless since the options are all in there.
   if ($form['group_type']['#disabled']) {
@@ -161,4 +161,6 @@ function blp_flex_groups_project_form_social_group_add_alter(&$form, FormStateIn
     $form['group_settings']['group_type']['#options']['blp_project'] = $flexible;
   }
 }
+
+
 
