@@ -53,7 +53,7 @@ function _blp_flex_groups_project_get_permissions($role) {
 
   // Authenticated.
   $permissions['authenticated'] = array_merge($permissions['anonymous'], [
-    'create flexible_group group',
+    'create blp_project group',
   ]);
 
   // Content manager.
