@@ -1,0 +1,20 @@
+field.field.group.blp_project.field_group_description:
+  expected_config: {  }
+  update_actions:
+    change:
+      translatable: TRUE
+field.field.group.blp_project.field_group_location:
+  expected_config: {  }
+  update_actions:
+    change:
+      translatable: TRUE
+field.field.group.blp_project.field_group_address:
+  expected_config: {  }
+  update_actions:
+    change:
+      translatable: TRUE
+field.field.group.blp_project.field_group_image:
+  expected_config: {  }
+  update_actions:
+    change:
+      translatable: TRUE

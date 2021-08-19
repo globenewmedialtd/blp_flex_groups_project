@@ -73,6 +73,7 @@ function blp_flex_groups_project_form_group_blp_project_edit_form_alter(&$form, 
  * Implements hook_form_alter().
  */
 function blp_flex_groups_project_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
   // Exposed Filter block on the all-groups overview and search.
   if ($form['#id'] === 'views-exposed-form-newest-groups-page-all-groups' ||
     $form['#id'] === 'views-exposed-form-search-groups-page-no-value' ||
@@ -93,7 +94,7 @@ function blp_flex_groups_project_form_alter(&$form, FormStateInterface $form_sta
 
     // Add states so this is only available when flexible groups is checked.
     // Could be hidden when only flexible groups is enabled, so check that.
-    // @TODO remove this once everything is migrated to flexible groups.
+    // @todo remove this once everything is migrated to flexible groups.
     if (!empty($form['field_group_allowed_join_method']) &&
       !empty($form['type']['#options']) &&
       $form['type']['#type'] !== 'hidden') {
@@ -104,7 +105,242 @@ function blp_flex_groups_project_form_alter(&$form, FormStateInterface $form_sta
       ];
     }
   }
+
+  // Better labels
+  if (in_array($form_id, [
+    'group_blp_project_edit_form',
+    'group_blp_project_add_form',
+  ])) {
+    $join_method_default_value = 'added';
+    // Ensure we have a better descriptive label.
+    if (array_key_exists('added', $form['field_group_allowed_join_method']['widget']['#options'])) {
+      $form['field_group_allowed_join_method']['widget']['#options']['added'] = t('Invite only');
+    }
+    if (array_key_exists('direct', $form['field_group_allowed_join_method']['widget']['#options'])) {
+      $form['field_group_allowed_join_method']['widget']['#options']['direct'] = t('Open to join');
+    }
+    // If directly exists it's becoming the default.
+    if (in_array('direct', $form['field_group_allowed_join_method']['widget']['#default_value'])) {
+      $join_method_default_value = 'direct';
+    }
+    elseif (in_array('request', $form['field_group_allowed_join_method']['widget']['#default_value'])) {
+      $join_method_default_value = 'request';
+    }
+    $form['field_group_allowed_join_method']['widget']['#type'] = 'radios';
+    $form['field_group_allowed_join_method']['widget']['#default_value'] = $join_method_default_value;
+  }
+
+  // For adding or editing a flexible group, we alter the visibility fields.
+  if ($form['#id'] === 'group-blp-project-add-form' ||
+    $form['#id'] === 'group-blp-project-edit-form') {
+    // Change the group visibility on flexible groups.
+    if (!empty($form['field_group_allowed_visibility'])) {
+      if (!empty($form['field_group_allowed_visibility']['widget']['#title'])) {
+        $form['field_group_allowed_visibility']['widget']['#title'] = t('Group content visibility options');
+      }
+      if (!empty($form['field_group_allowed_visibility']['widget']['#description'])) {
+        $form['field_group_allowed_visibility']['widget']['#description'] = t('Choose the visibility options allowed for the group content.');
+      }
+      // When referencing select lists and radio buttons in remote conditions,
+      // a 'value' condition must be used.
+      $form['field_group_allowed_visibility']['#states'] = [
+        'visible' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'public'],
+            ['value' => 'community'],
+            ['value' => 'members'],
+          ],
+        ],
+      ];
+    }
+    // Change the allowed join method on flexible groups.
+    if (!empty($form['field_group_allowed_join_method'])) {
+      // First we reorder the elmements, if invite only is part of it
+      // we always want to show this last.
+      if (!empty($form['field_group_allowed_join_method']['widget']['#options'])) {
+        if (array_key_exists('added', $form['field_group_allowed_join_method']['widget']['#options'])) {
+          $option = $form['field_group_allowed_join_method']['widget']['#options']['added'];
+          // Unset it.
+          unset($form['field_group_allowed_join_method']['widget']['#options']['added']);
+          // Add it at the end.
+          $form['field_group_allowed_join_method']['widget']['#options']['added'] = $option;
+        }
+      }
+
+      if (!empty($form['field_group_allowed_join_method']['widget']['#title'])) {
+        $form['field_group_allowed_join_method']['widget']['#title'] = t('Join methods');
+      }
+      if (!empty($form['field_group_allowed_join_method']['widget']['#description'])) {
+        $form['field_group_allowed_join_method']['widget']['#description'] = t('How can people join this group. Group managers can always add members directly, regardless of the chosen join method.');
+      }
+      // When referencing select lists and radio buttons in remote conditions,
+      // a 'value' condition must be used.
+      $form['field_group_allowed_join_method']['#states'] = [
+        'visible' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'public'],
+            ['value' => 'community'],
+            ['value' => 'members'],
+          ],
+        ],
+      ];
+    }
+    // Only when adding a flexible group, we need to predefine the
+    // content visibility and join method based on the group visibility.
+    if ($form['#id'] === 'group-blp-project-add-form') {
+      // Reset default_values on the add form only.
+      // So we can use state management to check / select.
+      if (!empty($form['field_group_allowed_join_method']['widget']['#default_value'])) {
+        $form['field_group_allowed_join_method']['widget']['#default_value'] = [];
+      }
+      if (!empty($form['field_group_allowed_visibility']['widget']['#default_value'])) {
+        $form['field_group_allowed_visibility']['widget']['#default_value'] = [];
+      }
+    }
+
+    // On the edit form, if there is no value set for the group_visibility
+    // it means it was an already existing flexible group and we need to add a
+    // default value so people can save it.
+    if ($form['#id'] === 'group-blp-project-edit-form' &&
+      empty($form['field_flexible_group_visibility']['widget']['#default_value'])) {
+      // The default is always community because we used to only have closed
+      // groups (which is visible for the community) or public if the
+      // content visibility has public as an option.
+      $form['field_flexible_group_visibility']['widget']['#default_value'] = 'community';
+      if (in_array('public', $form['field_group_allowed_visibility']['widget']['#default_value'])) {
+        $form['field_flexible_group_visibility']['widget']['#default_value'] = 'public';
+      }
+    }
+
+    // Disable type field if there are no terms added in 'Group type' vocab.
+    // Also, check for settings by SM for enabling this field.
+    $group_type_settings = \Drupal::config('social_group.settings')->get('social_group_type_required');
+    if ($group_type_settings
+      && isset($form['field_group_type'])
+      && !empty(\Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('group_type'))) {
+      $form['field_group_type']['widget']['#required'] = TRUE;
+      // Unset the group type label for none.
+      if (isset($form['field_group_type']['widget']['#options']['_none'])) {
+        unset($form['field_group_type']['widget']['#options']['_none']);
+      }
+    }
+    else {
+      $form['field_group_type']['#access'] = FALSE;
+    }
+
+    $form['#after_build'][] = 'blp_flex_groups_project_blp_project_add_after_build';
+    $form['#attached']['library'][] = 'blp_flex_groups_project/admin';
+  }
+
 }
+
+/**
+ * After_build function for the flexible group add form to add default states.
+ *
+ * @param array $form
+ *   The form element.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ *
+ * @return mixed
+ *   The form array containing the default values & states.
+ */
+function blp_flex_groups_project_blp_project_add_after_build(array $form, FormStateInterface $form_state) {
+  // Add states for content visibility based on group visibility.
+  // Only on the add page. On edit we want users to be able to consciously
+  // decide what allowed visibility to select.
+  if ($form['#id'] === 'group-blp-project-add-form' &&
+    isset($form['field_flexible_group_visibility']['widget']['#options'], $form['field_group_allowed_visibility']['widget']['#options'])) {
+    // If group visibility is public. All content visibility is selected.
+    $form['field_group_allowed_visibility']['widget']['public']['#states'] = [
+      'checked' => [
+        ':input[name="field_flexible_group_visibility"]' => [
+          ['value' => 'public'],
+        ],
+      ],
+      'unchecked' => [
+        ':input[name="field_flexible_group_visibility"]' => [
+          ['value' => 'community'],
+          ['value' => 'members'],
+        ],
+      ],
+    ];
+    // If group visibility is community. Communit & Group members are selected.
+    $form['field_group_allowed_visibility']['widget']['community']['#states'] = [
+      'checked' => [
+        ':input[name="field_flexible_group_visibility"]' => [
+          ['value' => 'public'],
+          ['value' => 'community'],
+        ],
+      ],
+      'unchecked' => [
+        ':input[name="field_flexible_group_visibility"]' => [
+          ['value' => 'members'],
+        ],
+      ],
+    ];
+    // If group visibility is group. Only group members are selected.
+    $form['field_group_allowed_visibility']['widget']['group']['#states'] = [
+      'checked' => [
+        ':input[name="field_flexible_group_visibility"]' => [
+          ['value' => 'public'],
+          ['value' => 'community'],
+          ['value' => 'members'],
+        ],
+      ],
+    ];
+  }
+  // Add states for join method based on group visibility.
+  // We do this for add and edit, we want to make sure if users make the
+  // decision to choose to only show a group to it's Members, the
+  // join method is selected to Invite only. Because there is no way
+  // for users to join or request to join in that case.
+  if (isset($form['field_flexible_group_visibility']['widget']['#options'], $form['field_group_allowed_join_method']['widget']['#options'])) {
+    // If group visibility is members. Select invite-only.
+    if (!empty($form['field_group_allowed_join_method']['widget']['added'])) {
+      $form['field_group_allowed_join_method']['widget']['added']['#states'] = [
+        'checked' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'members'],
+          ],
+        ],
+      ];
+    }
+    // If group visibility is members. Disable and uncheck open to join.
+    if (!empty($form['field_group_allowed_join_method']['widget']['direct'])) {
+      $form['field_group_allowed_join_method']['widget']['direct']['#states'] = [
+        'disabled' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'members'],
+          ],
+        ],
+        'unchecked' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'members'],
+          ],
+        ],
+      ];
+    }
+    // If group visibility is members. Disable and uncheck open to join.
+    if (!empty($form['field_group_allowed_join_method']['widget']['request'])) {
+      $form['field_group_allowed_join_method']['widget']['request']['#states'] = [
+        'disabled' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'members'],
+          ],
+        ],
+        'unchecked' => [
+          ':input[name="field_flexible_group_visibility"]' => [
+            ['value' => 'members'],
+          ],
+        ],
+      ];
+    }
+  }
+  return $form;
+}
+
+
 
 /**
  * Custom form submit handler for editing a flexible group.
@@ -161,6 +397,50 @@ function blp_flex_groups_project_form_social_group_add_alter(&$form, FormStateIn
     $form['group_settings']['group_type']['#options']['blp_project'] = $flexible;
   }
 }
+
+/**
+ * Implements template_preprocess_form_element().
+ */
+function blp_flex_groups_project_preprocess_fieldset(&$variables) {
+  // Make sure our flexible group visibility field renders a tooltip, since
+  // this field is rendered as fieldset with legend and radios as children
+  // we need to do it in this preprocess.
+  $element = $variables['element'];
+  if (!empty($element['#field_name'])) {
+    if ($element['#field_name'] === 'field_flexible_group_visibility') {
+      $description = '';
+      foreach ($element['#options'] as $key => $label) {
+        $description .= social_group_group_visibility_description($key);
+      }
+
+      // Render a specific tooltip based on a field name and description.
+      // This is done in the fieldset, next to the <legend>.
+      $variables['popover'] = social_group_render_tooltip('field_flexible_group_visibility', t('Group Visibility'), $description);
+    }
+    if ($element['#field_name'] === 'field_group_allowed_visibility') {
+      $description = '';
+      foreach ($element['#options'] as $key => $label) {
+        $description .= social_group_allowed_visibility_description($key);
+      }
+
+      // Render a specific tooltip based on a field name and description.
+      // This is done in the fieldset, next to the <legend>.
+      $variables['popover'] = social_group_render_tooltip('field_group_allowed_visibility', t('Group content visibility'), $description);
+    }
+    if ($element['#field_name'] === 'field_group_allowed_join_method') {
+      $description = '';
+      foreach ($element['#options'] as $key => $label) {
+        $description .= social_group_allowed_join_method_description($key);
+      }
+
+      // Render a specific tooltip based on a field name and description.
+      // This is done in the fieldset, next to the <legend>.
+      $variables['popover'] = social_group_render_tooltip('field_group_allowed_join_method', t('Join methods'), $description);
+    }
+  }
+}
+
+
 
 
 
